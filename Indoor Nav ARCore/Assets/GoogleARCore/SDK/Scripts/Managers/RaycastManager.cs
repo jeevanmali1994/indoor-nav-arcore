@@ -39,7 +39,7 @@ namespace GoogleARCoreInternal
         /// <param name="hitTestType">Hit test method used.</param>
         /// <param name="hitPose">Output pose if hit test is successful.</param>
         /// <returns>Return true if hit test is successful, otherwise false.</returns>
-        public bool Raycast(Ray ray, TrackableHitFlag filter, out TrackableHit hitResult)
+        public bool Raycast(Ray ray, TrackableHitFlags filter, out TrackableHit hitResult)
         {
             TrackableHit? closestHit = null;
             Frame.GetAllPlanes(ref m_allPlanes);
@@ -73,13 +73,13 @@ namespace GoogleARCoreInternal
             }
             else
             {
-                if (_HasFlag(filter, TrackableHitFlag.PointCloud))
+                if (_HasFlag(filter, TrackableHitFlags.PointCloud))
                 {
                     Vector3 hitpoint = new Vector3();
                     if (_IsRayIntersectingPoint(ray, Frame.PointCloud, ref hitpoint))
                     {
                         hitResult = new TrackableHit(hitpoint, Vector3.up, Vector3.Distance(hitpoint, ray.origin),
-                            TrackableHitFlag.PointCloud, null);
+                            TrackableHitFlags.PointCloud, null);
                         return true;
                     }
                 }
@@ -89,7 +89,7 @@ namespace GoogleARCoreInternal
             return false;
         }
 
-        public bool HitTestPlane(Ray ray, TrackableHitFlag hitFilterFlags, TrackedPlane plane, out TrackableHit hit)
+        public bool HitTestPlane(Ray ray, TrackableHitFlags hitFilterFlags, TrackedPlane plane, out TrackableHit hit)
         {
             Plane unityPlane = new Plane(plane.Rotation * Vector3.up, plane.Position);
             float distance;
@@ -97,25 +97,25 @@ namespace GoogleARCoreInternal
             if (unityPlane.Raycast(ray, out distance))
             {
                 Vector3 hitPoint = ray.GetPoint(distance);
-                TrackableHitFlag hitResultFlags = TrackableHitFlag.None;
+                TrackableHitFlags hitResultFlags = TrackableHitFlags.None;
 
-                if (_HasFlag(hitFilterFlags, TrackableHitFlag.PlaneWithinBounds) &&
+                if (_HasFlag(hitFilterFlags, TrackableHitFlags.PlaneWithinBounds) &&
                     _IsPointInBoundingBox(hitPoint, plane))
                 {
-                    hitResultFlags = hitResultFlags | TrackableHitFlag.PlaneWithinBounds;
+                    hitResultFlags = hitResultFlags | TrackableHitFlags.PlaneWithinBounds;
                 }
 
-                if (_HasFlag(hitFilterFlags, TrackableHitFlag.PlaneWithinPolygon) && _IsPointInPolygon(hitPoint, plane))
+                if (_HasFlag(hitFilterFlags, TrackableHitFlags.PlaneWithinPolygon) && _IsPointInPolygon(hitPoint, plane))
                 {
-                    hitResultFlags |= TrackableHitFlag.PlaneWithinPolygon;
+                    hitResultFlags |= TrackableHitFlags.PlaneWithinPolygon;
                 }
 
-                if (_HasFlag(hitFilterFlags, TrackableHitFlag.PlaneWithinInfinity))
+                if (_HasFlag(hitFilterFlags, TrackableHitFlags.PlaneWithinInfinity))
                 {
-                    hitResultFlags |= TrackableHitFlag.PlaneWithinInfinity;
+                    hitResultFlags |= TrackableHitFlags.PlaneWithinInfinity;
                 }
 
-                if (hitResultFlags != TrackableHitFlag.None)
+                if (hitResultFlags != TrackableHitFlags.None)
                 {
                     hit = new TrackableHit(hitPoint, unityPlane.normal, distance, hitResultFlags, plane);
                     return true;
@@ -227,9 +227,9 @@ namespace GoogleARCoreInternal
             return isPointFound;
         }
 
-        private bool _HasFlag(TrackableHitFlag filter, TrackableHitFlag flag)
+        private bool _HasFlag(TrackableHitFlags filter, TrackableHitFlags flag)
         {
-            return (filter & flag) != TrackableHitFlag.None;
+            return (filter & flag) != TrackableHitFlags.None;
         }
     }
 }
